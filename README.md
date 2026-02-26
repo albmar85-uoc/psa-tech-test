@@ -1,29 +1,191 @@
-# Take home project
-This is a simple e-commerce application that a customer can use to purchase a book, but it's missing the payments functionality —  your goal is to integrate Stripe to get this application running!
+# Stripe Checkout Integration – Sample E-commerce Flow
 
-## Candidate instructions
-You'll receive these in email.
+## Overview
 
-## Application overview
-This demo is written in Javascript (Node.js) with the [Express framework](https://expressjs.com/). You'll need to retrieve a set of testmode API keys from the Stripe dashboard (you can create a free test account [here](https://dashboard.stripe.com/register)) to run this locally.
+This project implements a simple end-to-end checkout flow using Stripe to process payments for a small e-commerce bookstore.
 
-We're using the [Bootstrap](https://getbootstrap.com/docs/4.6/getting-started/introduction/) CSS framework. It's the most popular CSS framework in the world and is pretty easy to get started with — feel free to modify styles/layout if you like. 
+The goal of this exercise is not only to enable payments, but to demonstrate a production-oriented integration approach aligned with Stripe’s recommended architecture and best practices.
 
-To simplify this project, we're also not using any database here, either. Instead `app.js` includes a simple switch statement to read the GET params for `item`. 
+The solution uses Stripe PaymentIntents and Stripe Elements to securely collect and confirm payments while maintaining a clear separation between frontend and backend responsibilities.
 
-To get started, clone the repository and run `npm install` to install dependencies:
+---
+
+## Customer Flow
+
+The implemented flow allows a user to:
+
+1. Select a book to purchase
+2. Proceed to checkout
+3. Enter payment details using Stripe Elements
+4. Complete payment
+5. View a confirmation page displaying:
+
+   * Total charged amount
+   * Payment Intent ID
+   * Payment status
+
+This reflects a realistic payment flow used in modern e-commerce integrations.
+
+---
+
+## Architecture Overview
+
+The integration follows a standard client → server → Stripe pattern.
 
 ```
-git clone https://github.com/mattmitchell6/sa-takehome-project-node && cd sa-takehome-project-node
+Browser (Stripe Elements)
+        ↓
+Node.js / Express backend
+        ↓
+Stripe PaymentIntents API
+```
+
+### Backend responsibilities
+
+* Create PaymentIntent securely using Stripe secret key
+* Control amount and currency server-side
+* Retrieve payment details after completion
+* Render confirmation page with real payment data
+
+### Frontend responsibilities
+
+* Render checkout UI
+* Request PaymentIntent from backend
+* Initialize Stripe Elements using client_secret
+* Confirm payment securely with Stripe.js
+
+This separation ensures sensitive operations remain server-side and no card data ever touches the backend.
+
+---
+
+## Why PaymentIntents
+
+The PaymentIntent API was used because it represents Stripe’s recommended integration model for modern payments.
+
+Benefits include:
+
+* Built-in support for SCA and 3DS authentication
+* Payment lifecycle tracking
+* Prevention of duplicate charges
+* Support for multiple payment methods
+* Secure confirmation via client_secret
+
+This approach is aligned with production Stripe integrations.
+
+---
+
+## Security Considerations
+
+The implementation follows standard security practices:
+
+* Secret key stored only in environment variables
+* PaymentIntent created exclusively server-side
+* Only client_secret exposed to frontend
+* Stripe Elements handles all card data
+* Backend never processes raw payment details
+
+This keeps the integration within minimal PCI scope.
+
+---
+
+## Running the project locally
+
+### 1. Install dependencies
+
+```
 npm install
 ```
 
-Rename `sample.env` to `.env` and populate with your Stripe account's test API keys
+### 2. Configure environment variables
 
-Then run the application locally:
+Create a `.env` file:
+
+```
+STRIPE_SECRET_KEY=sk_test_...
+```
+
+Publishable key is configured in the frontend.
+
+### 3. Start server
 
 ```
 npm start
 ```
 
-Navigate to [http://localhost:3000](http://localhost:3000) to view the index page.
+Application runs at:
+
+```
+http://localhost:3000
+```
+
+---
+
+## Testing payments
+
+Use Stripe test card:
+
+```
+4242 4242 4242 4242  
+Any future expiry date  
+Any 3-digit CVC  
+```
+
+After successful payment, the confirmation page will display:
+
+* Charged amount
+* PaymentIntent ID
+* Status
+
+---
+
+## Potential Production Enhancements
+
+Given more time, this integration could be extended to better reflect a production-grade partner implementation:
+
+### Webhooks
+
+Add Stripe webhooks to handle asynchronous events:
+
+* `payment_intent.succeeded`
+* `payment_intent.payment_failed`
+* refunds and disputes
+
+This ensures backend systems remain source of truth rather than relying solely on redirects.
+
+### Order persistence
+
+Introduce a database to:
+
+* store orders
+* link PaymentIntent to order state
+* support reconciliation and reporting
+
+### Idempotency & reliability
+
+* Use idempotency keys when creating PaymentIntents
+* Add structured logging and error handling
+* Improve retry handling
+
+### Multi-currency & localization
+
+* Dynamic currency selection
+* Local payment methods
+* Region-specific payment flows
+
+### Partner-scale considerations
+
+For larger partner integrations:
+
+* modular payment service layer
+* webhook event processing pipeline
+* observability and alerting
+* environment separation (test vs live)
+
+---
+
+## Summary
+
+This implementation demonstrates a clean and extensible Stripe integration using PaymentIntents and Stripe Elements, following recommended patterns for secure and scalable payment processing.
+
+The architecture is intentionally simple but structured to evolve toward a production-ready partner integration with webhook-driven event handling and persistent order management.
+

@@ -1,32 +1,83 @@
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const stripe = Stripe("pk_test_51T56lXGb9nGYi8eTTiSqJxrcmqYDvPemSF6ZnNJfp3IdLSQv9G6NZGC2H5fZZQ1K7bt57HfjBhQHdZLoaTc5Wpmj00RDLtoBLZ");
+
+  const response = await fetch("/create-payment-intent", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      amount: {{amount}}
+    })
+  });
+
+  const { clientSecret } = await response.json();
+
+  const elements = stripe.elements({ clientSecret });
+  const paymentElement = elements.create("payment");
+  paymentElement.mount("#payment-element");
+
+  const form = document.getElementById("payment-form");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: "http://localhost:3000/success"
+      }
+    });
+
+    if (error) {
+      document.getElementById("error-message").textContent = error.message;
+    }
+  });
+
+});
+</script>
+
 <div class="row justify-content-md-center">
   <div class="col-6">
     <div class="text-center mt-40">
-      <h1>
-        Checkout — Stripe Press
-      </h1>
-      <h5 class="text-secondary">
-        {{title}}
-      </h5>
+      <h1>Checkout — Stripe Press</h1>
+      <h5 class="text-secondary">{{title}}</h5>
       <hr class="mt-40">
       <div class="mt-20 text-info">
         Total due: $<span class="amount" data-amount="{{amount}}"></span>
       </div>
     </div>
-    <div class="card box-shadow mt-40">
-      <div class="card-body">
-        <form name="payment-form">
-          <div>
-            <label for="email">Email address</label>
-            <input type="email" class="form-control" id="email" name="email" placeholder="you@email.com">
-          </div>
-          <div class="mt-20 text-center text-secondary border-placeholder">
-            Add Stripe Element here!
-          </div>
-          <div class="mt-20">
-            <button type="submit" class="btn btn-lg btn-block btn-primary">Pay $<span class="amount" data-amount="{{amount}}"></span></button>
-          </div>
-        </form>
+
+```
+<div class="card box-shadow mt-40">
+  <div class="card-body">
+
+    <!-- SINGLE VALID FORM -->
+    <form id="payment-form">
+
+      <div>
+        <label for="email">Email address</label>
+        <input type="email" class="form-control" id="email" placeholder="you@email.com">
       </div>
-    </div>
+
+      <div class="mt-20 text-center text-secondary border-placeholder">
+        <div id="payment-element"></div>
+      </div>
+
+      <div class="mt-20">
+        <button type="submit" class="btn btn-lg btn-block btn-primary">
+          Pay $<span class="amount" data-amount="{{amount}}"></span>
+        </button>
+      </div>
+
+      <div id="error-message" class="text-danger mt-2"></div>
+
+    </form>
+
   </div>
 </div>
+

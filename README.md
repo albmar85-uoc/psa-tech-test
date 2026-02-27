@@ -146,23 +146,23 @@ The implementation follows standard security practices:
 
 This keeps the integration within minimal PCI scope. It is the responsibility of the implementer to review, validate, and ensure that all security requirements and compliance measures are properly met before deploying this solution to a production environment.
 
-## What challenges did I encounter?
+## What challenges did I face?
 
-During the implementation, I encountered several challenges:
+During the implementation, I faced several challenges:
 
-### 1. Understanding the Payment Intents lifecycle
+#### 1. Understanding the Payment Intents lifecycle
 A key step was understanding how the Payment Intents API works conceptually and how it fits into the overall payment flow. This includes the relationship between the backend-created PaymentIntent, the `client_secret`, and the frontend confirmation step using Stripe.js.
 
-### 2. Separating client and server responsibilities securely
+#### 2. Separating client and server responsibilities
 A critical challenge was ensuring that sensitive operations (such as creating the PaymentIntent and defining the amount) were handled exclusively on the server side, while keeping the client responsible only for confirmation.
 
-### 3. Correctly integrating the Payment Element
-The Payment Element simplifies multi-payment-method support, but requires proper initialization using the `client_secret`. Ensuring that the frontend only mounted the Element after successfully retrieving the client secret from the backend required attention to the request flow.
+#### 3. Correctly integrating the Payment Element
+Although the Payment Element abstracts much of the complexity of supporting multiple payment methods, it must be initialized with a client_secret created server-side. This meant structuring the request flow so that the frontend waits for the backend response before rendering the Element.
 
-### 4. Handling error scenarios
+#### 4. Handling error scenarios
 In this specific implementation, given the simplicity of the exercise, I did not implement a fully robust error-handling strategy for all possible failure scenarios (such as declined cards or authentication failures). However, working through the integration made it clear that comprehensive error handling is a critical part of any production-ready payments flow. In a real-world environment, I would invest further effort in expanding error handling, validating all possible PaymentIntent states.
 
-### 5. Designing for extensibility
+#### 5. Designing for extensibility
 Although the exercise is intentionally simple, I wanted to ensure the structure would support future enhancements. Balancing simplicity with extensibility required thoughtful architectural decisions.
 
 Overall, the main challenge was not writing the integration itself, but ensuring it followed secure, scalable, and production-aligned design principles while remaining simple and easy to understand.

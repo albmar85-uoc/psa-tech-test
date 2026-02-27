@@ -58,21 +58,7 @@ The implemented flow allows a user to:
 
 ## Architecture Overview (Stripe Elements + Payment Intents)
 
-```mermaid
-flowchart TD
-    A["Frontend<br>(Stripe.js + Payment Element)"]
-    B["Node.js / Express Backend"]
-    S[Stripe]
-
-    A -->|1. Create PaymentIntent| B
-    B -->|Create PaymentIntent| S
-    S -->|returns client_secret| B
-    B -->|client_secret| A
-    A -->|2. Confirm Payment| S
-
-    style A fill:#e0f2fe,stroke:#0369a1
-    style S fill:#f0f9ff,stroke:#0369a1,color:#1e40af
-```
+![Architecture Diagram](images/diagram.jpg)
 
 ### Express Backend responsibilities
 
@@ -219,10 +205,7 @@ For larger partner integrations:
 ## Summary
 
 This implementation provides a simple Stripe integration using PaymentIntents and the Payment Element, following Stripe’s recommended patterns for secure payment processing.
-<<<<<<< HEAD
-=======
-
 The architecture is intentionally lightweight and focused on clarity. While it is not production-ready, it is structured in a way that could be extended to support more robust features such as webhook-based event handling, improved error management, and persistent order storage.
->>>>>>> d0bd8e5 (Sync local changes)
 
-The architecture is intentionally lightweight and focused on clarity. While it is not production-ready, it is structured in a way that could be extended to support more robust features such as webhook-based event handling, improved error management, and persistent order storage.
+
+

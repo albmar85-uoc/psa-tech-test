@@ -221,4 +221,3 @@ For larger partner integrations:
 This implementation provides a simple Stripe integration using PaymentIntents and the Payment Element, following Stripe’s recommended patterns for secure payment processing.
 
 The architecture is intentionally lightweight and focused on clarity. While it is not production-ready, it is structured in a way that could be extended to support more robust features such as webhook-based event handling, improved error management, and persistent order storage.
-

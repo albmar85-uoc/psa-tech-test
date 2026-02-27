@@ -188,9 +188,46 @@ The solution is intentionally structured to allow future enhancements, such as:
 
 Overall, I focused on clarity, security, and alignment with Stripe’s recommended integration patterns while keeping the solution simple, maintainable, and easy to extend.
 
+## Code walkthrough: how the solution works
+
+### 1) How the solution works
+
+1. The customer opens `/` and selects a book.
+2. The server handles `GET /checkout?item=<id>`, maps the item to a title + price in cents, and renders `views/checkout.hbs`.
+3. The checkout page loads Stripe.js, then calls `POST /create-payment-intent` with the amount.
+4. The backend creates a PaymentIntent in Stripe and returns only `clientSecret`.
+5. The frontend initializes Stripe Elements with that `clientSecret`, mounts the Payment Element, and submits payment with `stripe.confirmPayment()`.
+6. Stripe redirects to `/success?payment_intent=...`; the server retrieves that PaymentIntent and renders amount, PaymentIntent id, and status.
+
+### 2) Which Stripe APIs are used
+
+- **Stripe Node SDK** (`stripe` package) on the server.
+  - `stripe.paymentIntents.create(...)` in `POST /create-payment-intent`.
+  - `stripe.paymentIntents.retrieve(...)` in `GET /success`.
+- **Stripe.js v3** on the client (`https://js.stripe.com/v3/`).
+  - `Stripe(publishableKey)` to initialize.
+  - `stripe.elements({ clientSecret })` + `elements.create("payment")` for the Payment Element.
+  - `stripe.confirmPayment(...)` for payment confirmation and redirect handling.
+
+### 3) How the application is architected
+
+- **Server layer (Express + Handlebars):**
+  - Owns routing and template rendering.
+  - Owns Stripe secret-key operations (PaymentIntent creation/retrieval).
+  - Serves static assets from `public/`.
+- **Client layer (checkout template + Stripe.js):**
+  - Renders the payment UI with Payment Element.
+  - Calls backend endpoint to obtain `clientSecret`.
+  - Confirms payment through Stripe.js.
+- **Stripe platform:**
+  - Stores and processes payment method details.
+  - Handles authentication flows (e.g., 3DS/SCA) during confirmation.
+
 ## Potential Production Enhancements
 
-Given more time, this integration could be extended to better reflect a production-grade partner implementation:
+Given more time, this integration could be extended to better reflect a production-grade partner implementation.
+
+
 
 ### Webhooks
 

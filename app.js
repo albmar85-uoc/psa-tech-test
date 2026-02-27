@@ -3,6 +3,7 @@ const path = require('path');
 const exphbs = require('express-handlebars');
 require('dotenv').config();
 
+// Import the Stripe library and initialize it with the secret key from environment variables
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -25,7 +26,7 @@ app.get('/', function(req, res) {
   res.render('index');
 });
 
-/**
+/**∫
  * Checkout route
  */
 app.get('/checkout', function(req, res) {
@@ -49,7 +50,7 @@ app.get('/checkout', function(req, res) {
       error = "No item selected";
       break;
   }
-
+// Render the checkout page with the selected item's title, amount, any error messages, and the Stripe publishable key for client-side integration
   res.render('checkout', {
     title: title,
     amount: amount,
@@ -61,6 +62,8 @@ app.get('/checkout', function(req, res) {
 /**
  * Create PaymentIntent
  */
+
+// Create a PaymentIntent by making a POST request to the server with the amount to be charged, and return the client secret for the PaymentIntent to the client
 app.post('/create-payment-intent', async (req, res) => {
   try {
     const amount = req.body.amount;
@@ -86,6 +89,8 @@ app.post('/create-payment-intent', async (req, res) => {
 /**
  * Success route
  */
+
+// Retrieve the PaymentIntent details using the payment intent ID from the query parameters, and render the success page with the payment details or any error messages
 app.get('/success', async function(req, res) {
   try {
     const paymentIntentId = req.query.payment_intent;
@@ -98,6 +103,7 @@ app.get('/success', async function(req, res) {
 
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
+// Render the success page with the amount charged, payment intent ID, and status of the payment
     res.render('success', {
       amount: paymentIntent.amount / 100,
       paymentIntentId: paymentIntent.id,

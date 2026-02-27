@@ -2,9 +2,10 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-
+// Initialize Stripe.js with the publishable key storered in the environment variable
   const stripe = Stripe("{{stripePublishableKey}}");
 
+// Create a payment intent by making a POST request to the server and passing the amount to be charged
   const response = await fetch("/create-payment-intent", {
     method: "POST",
     headers: {
@@ -17,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const { clientSecret } = await response.json();
 
+// Create an instance of Stripe Elements and mount the payment element to the DOM
   const elements = stripe.elements({ clientSecret });
   const paymentElement = elements.create("payment");
   paymentElement.mount("#payment-element");
@@ -26,6 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+// Confirm the payment using Stripe.js and handle any errors that occur during the confirmation process
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {

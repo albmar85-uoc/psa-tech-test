@@ -34,7 +34,7 @@ The implemented flow allows a user to:
 
 ```mermaid
 flowchart TD
-    A["Browser<br>Frontend (Stripe.js + Payment Element)"]
+    A["Frontend<br>(Stripe.js + Payment Element)"]
     B["Node.js / Express Backend"]
     S[Stripe]
 

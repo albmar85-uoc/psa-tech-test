@@ -145,6 +145,49 @@ After successful payment, the confirmation page will display:
 
 ---
 
+
+## How I approached the problem
+
+I approached this challenge by aligning the implementation with Stripe’s current best practices for custom payment integrations. Given the requirement to use the Stripe Payment Element instead of Checkout, I structured the solution around the Payment Intents API, which provides flexibility, strong authentication support (including SCA), and extensibility for future enhancements.
+
+My approach was incremental and architecture-driven:
+
+### 1. Understanding the existing application structure
+I first reviewed the Express server setup and the Handlebars templating to understand the request lifecycle, routing, and rendering logic. This ensured that the Stripe integration followed the existing application patterns cleanly and did not introduce unnecessary complexity.
+
+### 2. Designing a secure client–server payment flow
+I implemented a dedicated `/create-payment-intent` endpoint using the Stripe Node SDK. The backend is responsible for:
+
+- Creating the `PaymentIntent`
+- Defining the amount and currency
+- Returning only the `client_secret` to the frontend
+
+This ensures the Stripe secret key remains server-side and that sensitive logic (such as amount calculation) is never exposed to the client.
+
+### 3. Integrating the Stripe Payment Element on the frontend
+On the checkout page, I initialized Stripe.js with the publishable key and mounted the Payment Element using the `client_secret` returned by the backend.
+
+I used `stripe.confirmPayment()` to handle confirmation, allowing Stripe to manage authentication flows (including 3D Secure) automatically and ensuring compatibility with modern payment regulations.
+
+### 4. Implementing confirmation handling and result display
+After a successful payment, the application retrieves the `PaymentIntent` and displays:
+
+- The total charge amount
+- The Stripe PaymentIntent ID (beginning with `pi_`)
+
+This ensures the confirmation page reflects real Stripe transaction data rather than simulated results.
+
+### 5. Designing for extensibility
+The solution is intentionally structured to allow future enhancements, such as:
+
+- Adding webhook-based fulfillment for production reliability
+- Supporting subscriptions using Stripe Billing
+- Creating Customer objects to store payment methods
+- Expanding to multi-currency or multi-product support
+- Adding idempotency keys for increased robustness
+
+Overall, I focused on clarity, security, and alignment with Stripe’s recommended integration patterns while keeping the solution simple, maintainable, and easy to extend.
+
 ## Potential Production Enhancements
 
 Given more time, this integration could be extended to better reflect a production-grade partner implementation:

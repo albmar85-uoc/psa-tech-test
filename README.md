@@ -32,18 +32,6 @@ The implemented flow allows a user to:
 
 ## Architecture Overview
 
-The integration follows a standard client → server → Stripe pattern.
-
-```
-Browser (Stripe Elements)
-        ↓
-Node.js / Express backend
-        ↓
-Stripe PaymentIntents API
-```
-
-## Stripe Payment Architecture (Elements + PaymentIntents)
-
 ```mermaid
 flowchart TD
     A[Browser<br>Frontend + Stripe.js + Payment Element]

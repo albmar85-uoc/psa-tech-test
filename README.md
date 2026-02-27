@@ -34,7 +34,7 @@ The implemented flow allows a user to:
 
 ```mermaid
 flowchart TD
-    A[Browser<br>Frontend + Stripe.js + Payment Element]
+    A[Browser<br>Frontend (Stripe.js + Payment Element)]
     B[Node.js / Express Backend]
     C[Stripe<br>PaymentIntents.create]
     D[Stripe<br>Direct confirmation]

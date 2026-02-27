@@ -8,7 +8,7 @@
 
 This project implements a simple end-to-end checkout flow using Stripe to process payments for a small e-commerce bookstore.
 
-The goal of this exercise was to integrate Stripe into an existing application using recommended best practices, keeping the solution clean, secure and extensible.
+The goal of this exercise was to integrate Stripe into an existing application following recommended best practices, keeping the solution clean, secure and extensible.
 
 The integration uses Stripe Payment Intents and Stripe Elements, with a clear separation between frontend and backend responsibilities.
 

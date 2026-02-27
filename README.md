@@ -41,17 +41,22 @@ Node.js / Express backend
         ↓
 Stripe PaymentIntents API
 ```
-## Arquitectura
+## Arquitectura del pago con Stripe Elements + PaymentIntents
 
 ```mermaid
 flowchart TD
-    A[Browser<br>Frontend + Stripe.js + Payment Element] 
-    -->|1. POST /create-payment-intent| B[Node.js / Express Backend]
-    B -->|Stripe API| C[Stripe<br>PaymentIntents.create]
-    C -->|client_secret| B
+    A[Browser<br>Frontend + Stripe.js + Payment Element]
+    B[Node.js / Express Backend]
+    C[Stripe<br>PaymentIntents.create]
+    D[Stripe<br>confirmación directa]
+
+    A -->|1. Crear PaymentIntent| B
+    B -->|Stripe API| C
+    C -->|devuelve client_secret| B
     B -->|client_secret| A
-    A -->|2. stripe.confirmPayment| D[Stripe<br>direct confirmation]
-    style D fill:#f0f9ff
+    A -->|2. stripe.confirmPayment| D
+
+    style D fill:#f0f9ff,stroke:#0369a1,color:#1e40af
 
 
 ### Backend responsibilities

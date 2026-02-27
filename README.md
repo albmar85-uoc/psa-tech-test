@@ -1,12 +1,16 @@
-# Stripe Checkout Integration – Sample E-commerce Flow
+# Stripe Checkout Integration
+
+**Author:** Alberto Martin Monjas
+
+---
 
 ## Overview
 
 This project implements a simple end-to-end checkout flow using Stripe to process payments for a small e-commerce bookstore.
 
-The goal of this exercise is not only to enable payments, but to demonstrate a production-oriented integration approach aligned with Stripe’s recommended architecture and best practices.
+The goal of this exercise was to integrate Stripe into an existing application using recommended best practices, keeping the solution clean, secure and extensible.
 
-The solution uses Stripe PaymentIntents and Stripe Elements to securely collect and confirm payments while maintaining a clear separation between frontend and backend responsibilities.
+The integration uses Stripe Payment Intents and Stripe Elements, with a clear separation between frontend and backend responsibilities.
 
 ---
 
@@ -17,14 +21,12 @@ The implemented flow allows a user to:
 1. Select a book to purchase
 2. Proceed to checkout
 3. Enter payment details using Stripe Elements
-4. Complete payment
+4. Complete payment (using credit card or Amazon Pay)
 5. View a confirmation page displaying:
 
    * Total charged amount
    * Payment Intent ID
-   * Payment status
-
-This reflects a realistic payment flow used in modern e-commerce integrations.
+   * Payment Status
 
 ---
 
@@ -39,10 +41,22 @@ Node.js / Express backend
         ↓
 Stripe PaymentIntents API
 ```
+## Arquitectura
+
+```mermaid
+flowchart TD
+    A[Browser<br>Frontend + Stripe.js + Payment Element] 
+    -->|1. POST /create-payment-intent| B[Node.js / Express Backend]
+    B -->|Stripe API| C[Stripe<br>PaymentIntents.create]
+    C -->|client_secret| B
+    B -->|client_secret| A
+    A -->|2. stripe.confirmPayment| D[Stripe<br>direct confirmation]
+    style D fill:#f0f9ff
+
 
 ### Backend responsibilities
 
-* Create PaymentIntent securely using Stripe secret key
+* Create Payment Intent securely using Stripe secret key
 * Control amount and currency server-side
 * Retrieve payment details after completion
 * Render confirmation page with real payment data
@@ -50,11 +64,11 @@ Stripe PaymentIntents API
 ### Frontend responsibilities
 
 * Render checkout UI
-* Request PaymentIntent from backend
+* Request Payment Intent from backend
 * Initialize Stripe Elements using client_secret
 * Confirm payment securely with Stripe.js
 
-This separation ensures sensitive operations remain server-side and no card data ever touches the backend.
+This separation ensures sensitive operations remain server-side and no card data ever touches the backend (app.js)
 
 ---
 

@@ -14,17 +14,17 @@ The integration uses Stripe Payment Intents and Stripe Elements, with a clear se
 
 ---
 ## Running the project locally
-### 1. Install dependencies
+#### 1. Install dependencies
 ```
 npm install
 ```
-### 2. Configure environment variables
+#### 2. Configure environment variables
 Create a `.env` file:
 ```
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
-### 3. Start server
+#### 3. Start server
 ```
 npm start
 ```
@@ -35,16 +35,10 @@ http://localhost:3000
 ## Testing payments
 Use Stripe test card:
 ```
-4242 4242 4242 4242  
-Any future expiry date  
-Any 3-digit CVC  
+Number: 4242 4242 4242 4242  
+Date: Any future date  
+CVC: Any 3 digits  
 ```
-After successful payment, the confirmation page will display:
-* Charged amount
-* PaymentIntent ID
-* Status
----
-
 ## Customer Flow
 
 The implemented flow allows a user to:
@@ -61,7 +55,7 @@ The implemented flow allows a user to:
 
 ---
 
-## Stripe Payment Architecture (Elements + PaymentIntents)
+## Architecture Overview (Stripe Elements + Payment Intents)
 
 ```mermaid
 flowchart TD
@@ -95,22 +89,26 @@ flowchart TD
 
 This separation ensures sensitive operations remain server-side and no card data ever touches the backend (app.js)
 
+## How the solution works
+
+1. The customer opens http://localhost:3000/ to view the index page and selects a book
+2. The server handles `GET /checkout?item=<id>`, maps the item to a title + price in cents, and renders `views/checkout.hbs`
+3. The checkout page loads Stripe.js, then calls `POST /create-payment-intent` with the amount
+4. The backend `app.js`creates a PaymentIntent in Stripe and returns only `clientSecret`
+5. The frontend initializes Stripe Elements with that `clientSecret`, mounts the Payment Element, and submits payment with `stripe.confirmPayment()` directly to Stripe’s backend once the customer enters their payment details
+6. Stripe redirects to `/success?payment_intent=...`; the server retrieves that PaymentIntent and renders amount, PaymentIntent id, and status
+
+## Which Stripe APIs are used
+
+- **Stripe Node SDK** (`stripe` package) on the server to use [Payment Intents](https://docs.stripe.com/api/payment_intents)
+  - `stripe.paymentIntents.create(...)` in `POST /create-payment-intent`.
+  - `stripe.paymentIntents.retrieve(...)` in `GET /success`.
+- **Stripe.js v3** on the client (`https://js.stripe.com/v3/`).
+  - `Stripe(publishableKey)` to initialize.
+  - `stripe.elements({ clientSecret })` + `elements.create("payment")` for the [Payment Element](https://docs.stripe.com/js/element).
+  - `stripe.confirmPayment(...)` for payment confirmation and redirect handling.
+
 ---
-
-## Security Considerations
-
-The implementation follows standard security practices:
-
-* Secret keys stored only in environment variables
-* PaymentIntent created exclusively server-side
-* Only client_secret exposed to frontend
-* Stripe Elements handles all card data
-* Backend never processes raw payment details
-
-This keeps the integration within minimal PCI scope. It is the responsibility of the implementer to review, validate, and ensure that all security requirements and compliance measures are properly met before deploying this solution to a production environment.
-
----
-
 
 ## How I approached the problem
 
@@ -135,40 +133,41 @@ My approach was incremental and architecture-driven. I followed the steps below:
 
 Overall, I focused on clarity, security, and alignment with Stripe’s recommended integration patterns while keeping the solution simple, maintainable, and easy to extend.
 
+--- 
+## Security Considerations
+
+The implementation follows standard security practices:
+
+* Secret keys stored only in environment variables
+* PaymentIntent created exclusively server-side
+* Only client_secret exposed to frontend
+* Stripe Elements handles all card data
+* Backend never processes raw payment details
+
+This keeps the integration within minimal PCI scope. It is the responsibility of the implementer to review, validate, and ensure that all security requirements and compliance measures are properly met before deploying this solution to a production environment.
+
+## What challenges did I encounter?
+
+During the implementation, I encountered several challenges:
+
+### 1. Understanding the Payment Intents lifecycle
+A key step was understanding how the Payment Intents API works conceptually and how it fits into the overall payment flow. This includes the relationship between the backend-created PaymentIntent, the `client_secret`, and the frontend confirmation step using Stripe.js.
+
+### 2. Separating client and server responsibilities securely
+A critical challenge was ensuring that sensitive operations (such as creating the PaymentIntent and defining the amount) were handled exclusively on the server side, while keeping the client responsible only for confirmation.
+
+### 3. Correctly integrating the Payment Element
+The Payment Element simplifies multi-payment-method support, but requires proper initialization using the `client_secret`. Ensuring that the frontend only mounted the Element after successfully retrieving the client secret from the backend required attention to the request flow.
+
+### 4. Handling error scenarios
+In this specific implementation, given the simplicity of the exercise, I did not implement a fully robust error-handling strategy for all possible failure scenarios (such as declined cards or authentication failures). However, working through the integration made it clear that comprehensive error handling is a critical part of any production-ready payments flow. In a real-world environment, I would invest further effort in expanding error handling, validating all possible PaymentIntent states.
+
+### 5. Designing for extensibility
+Although the exercise is intentionally simple, I wanted to ensure the structure would support future enhancements. Balancing simplicity with extensibility required thoughtful architectural decisions.
+
+Overall, the main challenge was not writing the integration itself, but ensuring it followed secure, scalable, and production-aligned design principles while remaining simple and easy to understand.
+
 ---
-
-## How the solution works
-
-1. The customer opens `/` and selects a book.
-2. The server handles `GET /checkout?item=<id>`, maps the item to a title + price in cents, and renders `views/checkout.hbs`.
-3. The checkout page loads Stripe.js, then calls `POST /create-payment-intent` with the amount.
-4. The backend creates a PaymentIntent in Stripe and returns only `clientSecret`.
-5. The frontend initializes Stripe Elements with that `clientSecret`, mounts the Payment Element, and submits payment with `stripe.confirmPayment()`.
-6. Stripe redirects to `/success?payment_intent=...`; the server retrieves that PaymentIntent and renders amount, PaymentIntent id, and status.
-
-### Which Stripe APIs are used
-
-- **Stripe Node SDK** (`stripe` package) on the server.
-  - `stripe.paymentIntents.create(...)` in `POST /create-payment-intent`.
-  - `stripe.paymentIntents.retrieve(...)` in `GET /success`.
-- **Stripe.js v3** on the client (`https://js.stripe.com/v3/`).
-  - `Stripe(publishableKey)` to initialize.
-  - `stripe.elements({ clientSecret })` + `elements.create("payment")` for the Payment Element.
-  - `stripe.confirmPayment(...)` for payment confirmation and redirect handling.
-
-### 3) How the application is architected
-
-- **Server layer (Express + Handlebars):**
-  - Owns routing and template rendering.
-  - Owns Stripe secret-key operations (PaymentIntent creation/retrieval).
-  - Serves static assets from `public/`.
-- **Client layer (checkout template + Stripe.js):**
-  - Renders the payment UI with Payment Element.
-  - Calls backend endpoint to obtain `clientSecret`.
-  - Confirms payment through Stripe.js.
-- **Stripe platform:**
-  - Stores and processes payment method details.
-  - Handles authentication flows (e.g., 3DS/SCA) during confirmation.
 
 ## Potential Production Enhancements
 

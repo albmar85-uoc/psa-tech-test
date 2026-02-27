@@ -30,22 +30,22 @@ The implemented flow allows a user to:
 
 ---
 
-## Architecture Overview
+## Stripe Payment Architecture (Elements + PaymentIntents)
 
 ```mermaid
 flowchart TD
-    A[Browser<br>Frontend (Stripe.js + Payment Element)]
-    B[Node.js / Express Backend]
-    C[Stripe<br>PaymentIntents.create]
-    D[Stripe<br>Direct confirmation]
+    A["Browser<br>Frontend (Stripe.js + Payment Element)"]
+    B["Node.js / Express Backend"]
+    S[Stripe]
 
     A -->|1. Create PaymentIntent| B
-    B -->|Stripe API| C
-    C -->|returns client_secret| B
+    B -->|Create PaymentIntent| S
+    S -->|returns client_secret| B
     B -->|client_secret| A
-    A -->|2. stripe.confirmPayment| D
+    A -->|2. Confirm Payment| S
 
-    style D fill:#f0f9ff,stroke:#0369a1,color:#1e40af
+    style A fill:#e0f2fe,stroke:#0369a1
+    style S fill:#f0f9ff,stroke:#0369a1,color:#1e40af
 ```
 
 ### Backend responsibilities
@@ -110,6 +110,7 @@ Create a `.env` file:
 
 ```
 STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 Publishable key is configured in the frontend.

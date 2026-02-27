@@ -113,8 +113,6 @@ STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
-Publishable key is configured in the frontend.
-
 ### 3. Start server
 
 ```

@@ -134,18 +134,6 @@ My approach was incremental and architecture-driven. I followed the steps below:
 Overall, I focused on clarity, security, and alignment with Stripe’s recommended integration patterns while keeping the solution simple, maintainable, and easy to extend.
 
 --- 
-## Security Considerations
-
-The implementation follows standard security practices:
-
-* Secret keys stored only in environment variables
-* PaymentIntent created exclusively server-side
-* Only client_secret exposed to frontend
-* Stripe Elements handles all card data
-* Backend never processes raw payment details
-
-This keeps the integration within minimal PCI scope. It is the responsibility of the implementer to review, validate, and ensure that all security requirements and compliance measures are properly met before deploying this solution to a production environment.
-
 ## What challenges did I face?
 
 During the implementation, I faced several challenges:
@@ -167,15 +155,27 @@ Although the exercise is intentionally simple, I wanted to ensure the structure 
 
 Overall, the main challenge was not writing the integration itself, but ensuring it followed secure, scalable, and production-aligned design principles while remaining simple and easy to understand.
 
+## Security Considerations
+
+The implementation follows standard security practices:
+
+* Secret keys stored only in environment variables
+* PaymentIntent created exclusively server-side
+* Only client_secret exposed to frontend
+* Stripe Elements handles all card data
+* Backend never processes raw payment details
+
+This keeps the integration within minimal PCI scope. It would be responsibility of the implementer to review, validate, and ensure that all security requirements and compliance measures are properly met before deploying this solution to a production environment.
+
 ---
 
-## Potential Production Enhancements
+## Potential Enhancements
 
-Given more time, this integration could be extended to better reflect a production-grade partner implementation.
+Given more time, this integration could be extended to better reflect a production implementation.
 
 
 
-### Webhooks
+#### Webhooks
 
 Add Stripe webhooks to handle asynchronous events:
 
@@ -185,7 +185,7 @@ Add Stripe webhooks to handle asynchronous events:
 
 This ensures backend systems remain source of truth rather than relying solely on redirects.
 
-### Order persistence
+#### Order persistence
 
 Introduce a database to:
 
@@ -193,19 +193,18 @@ Introduce a database to:
 * link PaymentIntent to order state
 * support reconciliation and reporting
 
-### Idempotency & reliability
+#### Idempotency & reliability
 
 * Use idempotency keys when creating PaymentIntents
 * Add structured logging and error handling
 * Improve retry handling
 
-### Multi-currency & localization
+#### Multi-currency & localization
 
-* Dynamic currency selection
-* Local payment methods
+* Dynamic currency selection instead of supporting only USD
 * Region-specific payment flows
 
-### Partner-scale considerations
+#### Partner-scale considerations
 
 For larger partner integrations:
 
@@ -218,7 +217,7 @@ For larger partner integrations:
 
 ## Summary
 
-This implementation demonstrates a clean and extensible Stripe integration using PaymentIntents and Stripe Elements, following recommended patterns for secure and scalable payment processing.
+This implementation provides a simple Stripe integration using PaymentIntents and the Payment Element, following Stripe’s recommended patterns for secure payment processing.
 
-The architecture is intentionally simple but structured to evolve toward a production-ready partner integration with webhook-driven event handling and persistent order management.
+The architecture is intentionally lightweight and focused on clarity. While it is not production-ready, it is structured in a way that could be extended to support more robust features such as webhook-based event handling, improved error management, and persistent order storage.
 

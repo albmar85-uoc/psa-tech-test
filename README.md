@@ -14,6 +14,7 @@ The integration uses Stripe Payment Intents and Stripe Elements, with a clear se
 
 ---
 ## Running the project locally
+This application is built using **Node.js** with the **Express** framework
 #### 1. Install dependencies
 ```
 npm install

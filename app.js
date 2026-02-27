@@ -53,7 +53,8 @@ app.get('/checkout', function(req, res) {
   res.render('checkout', {
     title: title,
     amount: amount,
-    error: error
+    error: error,
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY
   });
 });
 

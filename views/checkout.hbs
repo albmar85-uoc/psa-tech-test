@@ -3,7 +3,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
-  const stripe = Stripe("pk_test_51T56lXGb9nGYi8eTTiSqJxrcmqYDvPemSF6ZnNJfp3IdLSQv9G6NZGC2H5fZZQ1K7bt57HfjBhQHdZLoaTc5Wpmj00RDLtoBLZ");
+  const stripe = Stripe("{{stripePublishableKey}}");
 
   const response = await fetch("/create-payment-intent", {
     method: "POST",

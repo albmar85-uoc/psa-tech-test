@@ -41,6 +41,7 @@ Node.js / Express backend
         ↓
 Stripe PaymentIntents API
 ```
+
 ## Arquitectura del pago con Stripe Elements + PaymentIntents
 
 ```mermaid
@@ -57,7 +58,7 @@ flowchart TD
     A -->|2. stripe.confirmPayment| D
 
     style D fill:#f0f9ff,stroke:#0369a1,color:#1e40af
-
+```
 
 ### Backend responsibilities
 
